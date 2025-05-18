@@ -1,0 +1,13 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+.desc * {
+  max-width: 100%;
+
+  & img {
+    max-width: 75%;
+    max-height: 40vh;
+  }
+}
