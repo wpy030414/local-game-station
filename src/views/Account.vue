@@ -1,18 +1,16 @@
 <script setup lang="ts">
+import GameItemEditor from '@/components/GameItemEditor.vue'
 import GameItem from '@/components/GameThumb.vue'
 import { useGames } from '@/stores/games'
-import { useSearch } from '@/stores/search'
 import type { Game } from '@/types/Game'
-import { ref, watch } from 'vue'
+import { provide, ref, watch } from 'vue'
 
+const search = ref('')
 const tempView = ref<Game[]>([])
 
 watch(
-  [useSearch(), useGames()],
-  () =>
-    (tempView.value = useGames().value.filter((e) =>
-      JSON.stringify(e).includes(useSearch().value),
-    )),
+  [search, useGames()],
+  () => (tempView.value = useGames().value.filter((e) => JSON.stringify(e).includes(search.value))),
   {
     immediate: true,
   },
@@ -27,9 +25,21 @@ function visit(site: string) {
     ]).get(site),
   )
 }
+
+const dialog = ref(false)
+provide('dialog-from-App.vue', dialog)
 </script>
 
 <template>
+  <v-card class="px-2 py-2">
+    <v-text-field
+      v-model="search"
+      hide-details
+      prepend-inner-icon="mdi-magnify"
+      placeholder="搜索"
+    ></v-text-field>
+  </v-card>
+
   <v-row v-if="tempView.length">
     <v-col
       v-for="g of tempView"
@@ -45,7 +55,7 @@ function visit(site: string) {
       <game-item
         :value="g"
         type="large-icon"
-        @click="() => $router.push('/g/' + (g.title || '404'))"
+        @click="() => $router.push('/lib/' + (g.title || '404'))"
       />
     </v-col>
   </v-row>
@@ -69,6 +79,16 @@ function visit(site: string) {
       </v-card-actions>
     </v-card>
   </v-empty-state>
+
+  <v-fab
+    app
+    size="large"
+    icon="mdi-plus"
+    style="transform: translate(-1rem, -1rem)"
+    @click="dialog = true"
+  />
+
+  <game-item-editor manager-id="dialog-from-App.vue" mode="create"></game-item-editor>
 </template>
 
 <style scoped></style>
